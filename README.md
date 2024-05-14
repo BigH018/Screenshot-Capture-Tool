@@ -11,13 +11,29 @@ This tool is designed to capture screenshots from video files with ease. It prov
 - Progress bar to track the screenshot capture process.
 - Estimated remaining time display.
 
-## Installation
+## Dependencies
 
-To use this tool, you need to have Python installed on your system. You can install the required dependencies using pip:
+Before running the tool, make sure you have the following Python packages installed:
 
-```
-pip install -r requirements.txt
-```
+- OpenCV (cv2)
+    ```
+    pip install opencv-python
+    ```
+
+- NumPy
+    ```
+    pip install numpy
+    ```
+
+- Tkinter (for GUI)
+    - For Python 3.x:
+    ```
+    pip install tk
+    ```
+    - For Python 2.x:
+    ```
+    pip install tkinter
+    ```
 
 ## Usage
 
