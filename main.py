@@ -6,7 +6,19 @@ import threading
 from datetime import datetime, timedelta
 import traceback
 
-def capture_screenshots(video_path, output_folder, crop_size, progress_bar, remaining_time_label, callback):
+# Define global variables
+videos_processed = 0
+total_videos = 0
+
+# Define screenshot interval options with corresponding frame rates
+screenshot_intervals = {
+    "Every Frame": 1,
+    "Every 2 Frames": 2,
+    "Every 30 Frames": 30,
+    "Every 60 Frames": 60
+}
+
+def capture_screenshots(video_path, output_folder, crop_size, screenshot_interval, progress_bar, remaining_time_label, callback):
     try:
         # Create output folder if it doesn't exist
         if not os.path.exists(output_folder):
@@ -14,7 +26,6 @@ def capture_screenshots(video_path, output_folder, crop_size, progress_bar, rema
 
         # Open the video file
         video = cv2.VideoCapture(video_path)
-        fps = int(video.get(cv2.CAP_PROP_FPS))
         frame_count = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
 
         # Capture screenshots
@@ -26,15 +37,15 @@ def capture_screenshots(video_path, output_folder, crop_size, progress_bar, rema
             if not success:
                 break
 
-            # Only capture if it's time for a screenshot
-            if current_frame % fps == 0:
-                # Crop the frame based on user selected size
-                center_x = frame.shape[1] // 2
-                center_y = frame.shape[0] // 2
+            # Crop the frame based on user selected size
+            center_x = frame.shape[1] // 2
+            center_y = frame.shape[0] // 2
 
-                crop_half_size = crop_size // 2
-                cropped_frame = frame[center_y - crop_half_size:center_y + crop_half_size, center_x - crop_half_size:center_x + crop_half_size]
+            crop_half_size = crop_size // 2
+            cropped_frame = frame[center_y - crop_half_size:center_y + crop_half_size, center_x - crop_half_size:center_x + crop_half_size]
 
+            # Check if it's time to capture a screenshot based on the selected interval
+            if current_frame % screenshot_interval == 0:
                 # Generate unique filename with timestamp
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
                 screenshot_path = os.path.join(output_folder, f"frame_{timestamp}.jpg")
@@ -52,9 +63,9 @@ def capture_screenshots(video_path, output_folder, crop_size, progress_bar, rema
                 elapsed_time = current_time - start_time
                 if screenshot_count > 0:
                     average_time_per_screenshot = elapsed_time / screenshot_count
-                    remaining_time = average_time_per_screenshot * (frame_count - current_frame) / fps
+                    remaining_time = average_time_per_screenshot * (frame_count - current_frame)
                     remaining_time_label.config(text=f"Estimated Time Remaining: {str(remaining_time).split('.')[0]}")
-                
+
                 root.update_idletasks()
 
             current_frame += 1
@@ -69,15 +80,17 @@ def capture_screenshots(video_path, output_folder, crop_size, progress_bar, rema
         messagebox.showerror("Error", f"An error occurred: {str(e)}")
         callback()  # Call the callback function to prompt for another video
 
-def select_files():
+
+def select_file():
     try:
-        file_paths = filedialog.askopenfilenames()
-        if file_paths:
+        file_path = filedialog.askopenfilename()
+        if file_path:
             file_entry.delete(0, tk.END)
-            file_entry.insert(0, ", ".join(file_paths))
+            file_entry.insert(0, file_path)
     except Exception as e:
         traceback.print_exc()  # Print traceback for debugging
         messagebox.showerror("Error", f"An error occurred: {str(e)}")
+
 
 def select_output_folder():
     try:
@@ -89,11 +102,6 @@ def select_output_folder():
         traceback.print_exc()  # Print traceback for debugging
         messagebox.showerror("Error", f"An error occurred: {str(e)}")
 
-# Variable to keep track of the total number of videos
-total_videos = 0
-
-# Variable to keep track of how many videos have been processed
-videos_processed = 0
 
 def prompt_for_another_video():
     global videos_processed
@@ -106,35 +114,36 @@ def prompt_for_another_video():
         # Prompt user to select another video file
         messagebox.showinfo("Capture Complete", "Screenshot capture process completed.")
         videos_processed = 0  # Reset the count of processed videos for future captures
-        select_files()
+        select_file()
+
 
 def start_capture():
     global total_videos
     
-    # Check if video files, output folder, and crop size are selected
-    video_files = file_entry.get().split(", ")
+    # Check if video file, output folder, and crop size are selected
+    video_file = file_entry.get()
     output_folder = output_folder_entry.get()
     crop_size = int(crop_size_var.get())  # Get the selected crop size
-    if not video_files or not output_folder or crop_size <= 0:
-        messagebox.showwarning("Warning", "Please select video files, output folder, and crop size.")
+    screenshot_interval = screenshot_intervals[screenshot_interval_var.get()]  # Get the selected screenshot interval
+    if not video_file or not output_folder or crop_size <= 0:
+        messagebox.showwarning("Warning", "Please select a video file, an output folder, and a valid crop size.")
         return
     
     # Set the total number of videos
-    total_videos = len(video_files)
+    total_videos = 1
     
     # Create progress bar
     progress_bar = ttk.Progressbar(root, orient='horizontal', length=300, mode='determinate')
-    progress_bar.grid(row=5, columnspan=4, padx=3, pady=5)
+    progress_bar.grid(row=6, columnspan=4, padx=3, pady=5)
 
     # Create estimated remaining time label
     remaining_time_label = tk.Label(root, text="Estimated Time Remaining: --:--:--")
-    remaining_time_label.grid(row=6, columnspan=3, padx=5, pady=5)
+    remaining_time_label.grid(row=7, columnspan=4, padx=5, pady=5)
 
     try:
-        # Start screenshot capture process for each selected video file in a separate thread
-        for video_file in video_files:
-            screenshot_thread = threading.Thread(target=capture_screenshots, args=(video_file, output_folder, crop_size, progress_bar, remaining_time_label, prompt_for_another_video))
-            screenshot_thread.start()
+        # Start screenshot capture process for the selected video file
+        screenshot_thread = threading.Thread(target=capture_screenshots, args=(video_file, output_folder, crop_size, screenshot_interval, progress_bar, remaining_time_label, prompt_for_another_video))
+        screenshot_thread.start()
     except Exception as e:
         traceback.print_exc()  # Print traceback for debugging
         messagebox.showerror("Error", f"An error occurred: {str(e)}")
@@ -153,11 +162,11 @@ def display_explanation():
         Click the 'Next' button to continue.
         """,
         """
-        Page 2: Select Video Files
+        Page 2: Select Video File
 
-        To get started, select one or more video files from your computer. 
-        Click the 'Browse' button next to the 'Video Files' field to open a file dialog. 
-        Once you've selected the desired video files, they will be displayed in the input field.
+        To get started, select a video file from your computer. 
+        Click the 'Browse' button next to the 'Video File' field to open a file dialog. 
+        Once you've selected the desired video file, its path will be displayed in the input field.
 
         Click the 'Next' button to continue.
         """,
@@ -182,13 +191,21 @@ def display_explanation():
         Choose a crop size that suits your needs and provides sufficient detail for your screenshots.
 
         Click the 'Next' button to continue.
-        """,  
+        """,
         """
-        Page 5: Start Capture
+        Page 5: Select Screenshot Interval
 
-        Once you've selected video files, an output folder, and specified the crop size, 
+        Choose the interval at which screenshots will be captured from the video using the dropdown menu.
+        Options include capturing a screenshot every frame, every 2 frames, every 30 frames, or every 60 frames.
+
+        Click the 'Next' button to continue.
+        """,
+        """
+        Page 6: Start Capture
+
+        Once you've selected a video file, an output folder, specified the crop size, and chosen the screenshot interval, 
         you're ready to start capturing screenshots. Click the 'Start Capture' button to 
-        initiate the screenshot capture process. The tool will process each selected video file, 
+        initiate the screenshot capture process. The tool will process the selected video file, 
         extracting screenshots based on the specified parameters.
 
         That's it! Click the 'Next' button to close the explanation.
@@ -226,12 +243,12 @@ root.title("ScreenShot Capture Tool - By BigH")
 explanation_button = tk.Button(root, text="Explanation", command=display_explanation)
 explanation_button.grid(row=0, column=3, padx=5, pady=5, sticky="e")
 
-# Video Files section
-file_label = tk.Label(root, text="Video File/Files (MAX 5):")
+# Video File section
+file_label = tk.Label(root, text="Video File:")
 file_label.grid(row=1, column=0, padx=5, pady=5, sticky="w")
 file_entry = tk.Entry(root, width=50)
 file_entry.grid(row=1, column=1, padx=5, pady=5)
-file_button = tk.Button(root, text="Browse", command=select_files)
+file_button = tk.Button(root, text="Browse", command=select_file)
 file_button.grid(row=1, column=2, padx=5, pady=5)
 
 # Output Folder section
@@ -249,8 +266,16 @@ crop_size_var = tk.StringVar(root)
 crop_size_entry = tk.Entry(root, textvariable=crop_size_var, width=10)
 crop_size_entry.grid(row=3, column=1, padx=5, pady=5)
 
+# Screenshot Interval section
+screenshot_interval_label = tk.Label(root, text="Screenshot Interval:")
+screenshot_interval_label.grid(row=4, column=0, padx=5, pady=5, sticky="w")
+screenshot_interval_var = tk.StringVar(root)
+screenshot_interval_dropdown = ttk.Combobox(root, textvariable=screenshot_interval_var, values=list(screenshot_intervals.keys()))
+screenshot_interval_dropdown.grid(row=4, column=1, padx=5, pady=5)
+screenshot_interval_dropdown.current(0)  # Set default option
+
 # Start Capture button
 start_button = tk.Button(root, text="Start Capture", command=start_capture)
-start_button.grid(row=4, column=1, padx=5, pady=5)
+start_button.grid(row=5, column=1, padx=5, pady=5)
 
 root.mainloop()
