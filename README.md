@@ -1,67 +1,43 @@
 # Video Screenshot Capture Tool
 
-This tool is designed to capture screenshots from video files using OpenCV and Tkinter GUI in Python.
+This tool is designed to capture screenshots from video files with ease. It provides a user-friendly interface for selecting a video file, specifying an output folder, setting a crop size, and choosing a screenshot interval. Screenshots are captured based on the specified parameters.
 
 ## Features
 
-- **Multi-Video Support:** Capture screenshots from one or more video files simultaneously, saving time and effort.
-- **Customizable Crop Size:** Specify the size of the area to be cropped from each frame of the video, providing flexibility in screenshot composition.
-- **Efficient Processing:** Utilizes threading to process multiple videos concurrently, maximizing performance.
-- **Visual Progress Tracking:** Monitor the progress of screenshot capture with a visual progress bar and estimated remaining time.
-- **Error Handling:** Gracefully handle errors and exceptions to ensure a smooth user experience.
+- Select a video file from your computer.
+- Choose the folder where captured screenshots will be saved.
+- Specify the size of the area to be cropped from each frame of the video.
+- Choose the interval at which screenshots will be captured from the video.
+- Progress bar to track the screenshot capture process.
+- Estimated remaining time display.
 
-## Getting Started
+## Installation
 
-### Prerequisites
+To use this tool, you need to have Python installed on your system. You can install the required dependencies using pip:
 
-Ensure you have the following installed on your system:
+```
+pip install -r requirements.txt
+```
 
-- **Python 3.x:** The programming language used to run the tool.
-- **OpenCV (`opencv-python`):** OpenCV library for image and video processing.
-- **Tkinter:** GUI toolkit for Python (usually included in standard Python installations).
+## Usage
 
-### Installation
+1. Run the script by executing `python screenshot_tool.py`.
+2. Select a video file using the 'Browse' button next to the 'Video File' field.
+3. Choose an output folder where captured screenshots will be saved.
+4. Specify the crop size in pixels.
+5. Choose the screenshot interval from the dropdown menu.
+6. Click the 'Start Capture' button to initiate the screenshot capture process.
+7. Monitor the progress using the progress bar and estimated remaining time display.
+8. Once the capture process is complete, the tool will prompt you to select another video file.
 
-Clone the repository:
+## Explanation
 
-git clone https://github.com/yourusername/video-screenshot-capture-tool.git
-
-
-### Usage
-
-1. Run the script `main.py`.
-2. **Select Video Files (MAX 5):** Click the "Browse" button next to "Video Files" to select one or more video files for screenshot capture. Please note that due to threading limitations, the tool supports capturing screenshots from a maximum of 5 videos at a time.
-3. **Choose Output Folder:** Select the output folder where captured screenshots will be saved by clicking the "Browse" button next to "Output Folder."
-4. **Specify Crop Size:** Enter the desired crop size in pixels in the "Crop Size" field, determining the area to be captured from each frame.
-5. **Start Capture:** Click the "Start Capture" button to initiate the screenshot capture process.
-
-## Compiling into an Executable
-
-You can compile the Python script into an executable file for easier distribution. One popular tool for this purpose is `pyinstaller`. Install it via pip:
-
-   ```
-   pip install pyinstaller
-   ```
-
-Then, navigate to the project directory in the terminal and run: pyinstaller --onefile --noconsole main.py
-
-   ```
-   pyinstaller --onefile --noconsole main.py
-   ```
-
-This command will create a standalone executable file in the `dist` directory.
+If you're unsure how to use the tool, you can click the 'Explanation' button to display a series of explanation pages that guide you through the process.
 
 ## Contributing
 
-Contributions are welcome! If you'd like to contribute to this project, please follow these steps:
-
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature/yourfeature`).
-3. Make your changes.
-4. Commit your changes (`git commit -am 'Add some feature'`).
-5. Push to the branch (`git push origin feature/yourfeature`).
-6. Create a new Pull Request.
+Contributions are welcome! If you find any issues or have suggestions for improvements, feel free to open an issue or create a pull request.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the [MIT License](LICENSE).
