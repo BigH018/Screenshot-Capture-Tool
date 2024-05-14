@@ -35,6 +35,22 @@ git clone https://github.com/yourusername/video-screenshot-capture-tool.git
 4. **Specify Crop Size:** Enter the desired crop size in pixels in the "Crop Size" field, determining the area to be captured from each frame.
 5. **Start Capture:** Click the "Start Capture" button to initiate the screenshot capture process.
 
+## Compiling into an Executable
+
+You can compile the Python script into an executable file for easier distribution. One popular tool for this purpose is `pyinstaller`. Install it via pip:
+
+   ```
+   pip install pyinstaller
+   ```
+
+Then, navigate to the project directory in the terminal and run: pyinstaller --onefile --noconsole main.py
+
+   ```
+   pyinstaller --onefile --noconsole main.py
+   ```
+
+This command will create a standalone executable file in the `dist` directory.
+
 ## Contributing
 
 Contributions are welcome! If you'd like to contribute to this project, please follow these steps:
